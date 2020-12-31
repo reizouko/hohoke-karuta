@@ -59,6 +59,19 @@ export default () => {
 
   const [readingStep, setReadingStep] = useState<"READY" | "SENTENCE" | "END">("READY");
   const [shuffledVoiceIndices, setShuffledVoiceIndices] = useState<Array<number>>([]);
+  const [continuous, setContinuous] = useState(false);
+  const [clickable, setClickable] = useState(true);
+  const [reading, setReading] = useState(false);
+
+  const start = (continuous: boolean): void => {
+    setClickable(false);
+    setContinuous(continuous);
+    if (shuffledVoiceIndices.length === 0) {
+      setShuffledVoiceIndices(shuffle(range(readingFiles.length)));
+    }
+    setReadingStep("READY");
+    setReading(true);
+  };
 
   const classes = useStyles();
 
@@ -85,14 +98,16 @@ export default () => {
           </CardContent>
           <CardActions className={classes.cardButton}>
             <Button variant="contained" color="primary" onClick={() => {
-              setReadingStep("READY");
-              setShuffledVoiceIndices(shuffle(range(readingFiles.length)));
-            }} disabled={shuffledVoiceIndices.length > 0}>スタート</Button>
+              start(false);
+            }} disabled={!clickable}>1枚読む</Button>
+            <Button variant="outlined" color="secondary" onClick={() => {
+              start(true);
+            }} disabled={!clickable}>全部連続して読む</Button>
           </CardActions>
         </Card>
         <Sound
           url={`${process.env.PUBLIC_URL}/voice/00_ONE_それじゃあ、いくよー….wav`}
-          playStatus={shuffledVoiceIndices.length > 0 && readingStep === "READY" ? "PLAYING" : "STOPPED"}
+          playStatus={reading && readingStep === "READY" ? "PLAYING" : "STOPPED"}
           onFinishedPlaying={() => {
             setTimeout(() => {
               setReadingStep("SENTENCE");
@@ -101,19 +116,25 @@ export default () => {
         />
         <Sound
           url={`${process.env.PUBLIC_URL}/voice/01_ONE_取れたかな？.wav`}
-          playStatus={shuffledVoiceIndices.length > 0 && readingStep === "END" ? "PLAYING" : "STOPPED"}
+          playStatus={reading && readingStep === "END" ? "PLAYING" : "STOPPED"}
           onFinishedPlaying={() => {
-            setTimeout(() => {
-              setReadingStep("READY");
-              setShuffledVoiceIndices(shuffledVoiceIndices.slice(1));
-            }, 3000);
+            setReading(false);
+            setShuffledVoiceIndices(shuffledVoiceIndices.slice(1));
+            if (continuous && shuffledVoiceIndices.length > 1) {
+              setTimeout(() => {
+                setReadingStep("READY");
+                setReading(true);
+              }, 3000);
+            } else {
+              setClickable(true);
+            }
           }}
         />
         {
           readingFiles.map((fileName, index) =>
             <Sound
               url={`${process.env.PUBLIC_URL}/voice/${fileName}`}
-              playStatus={shuffledVoiceIndices.length > 0 && readingStep === "SENTENCE" && shuffledVoiceIndices[0] === index ? "PLAYING" : "STOPPED"}
+              playStatus={reading && readingStep === "SENTENCE" && shuffledVoiceIndices[0] === index ? "PLAYING" : "STOPPED"}
               onFinishedPlaying={() => {
                 setTimeout(() => {
                   setReadingStep("END");
