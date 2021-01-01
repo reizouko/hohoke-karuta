@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
-import { Box, Button, Card, CardActions, CardContent, Container, CssBaseline, makeStyles, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Container, CssBaseline, Fade, makeStyles, Typography } from '@material-ui/core';
 import { default as Sound } from 'react-sound';
 import { default as shuffle } from 'shuffle-array';
 
+// 読みボイスのファイル名
 const readingFiles = [
   "02_ONE_留守番電話の擬人化キ….wav",
   "03_ONE_発信者番号表示サービ….wav",
@@ -33,6 +34,9 @@ const readingFiles = [
 
 const range = (length: number): Array<number> => [...Array(length)].map((_, i) => i);
 
+// 絵札のファイル名。readingFilesと順番を合わせること。
+const cardFileNames = range(readingFiles.length).map(i => i + 1).map(n => `2021-${('0' + n).slice(-2)}.png`)
+
 const useStyles = makeStyles(theme => ({
   paper: {
     marginTop: theme.spacing(3),
@@ -52,6 +56,9 @@ const useStyles = makeStyles(theme => ({
   },
   cards: {
     fontWeight: "bold"
+  },
+  cardFace: {
+    width: "100%"
   }
 }));
 
@@ -66,8 +73,10 @@ export default () => {
   const start = (continuous: boolean): void => {
     setClickable(false);
     setContinuous(continuous);
-    if (shuffledVoiceIndices.length === 0) {
+    if (shuffledVoiceIndices.length <= 1) {
       setShuffledVoiceIndices(shuffle(range(readingFiles.length)));
+    } else {
+      setShuffledVoiceIndices(shuffledVoiceIndices.slice(1));
     }
     setReadingStep("READY");
     setReading(true);
@@ -119,12 +128,12 @@ export default () => {
           playStatus={reading && readingStep === "END" ? "PLAYING" : "STOPPED"}
           onFinishedPlaying={() => {
             setReading(false);
-            setShuffledVoiceIndices(shuffledVoiceIndices.slice(1));
             if (continuous && shuffledVoiceIndices.length > 1) {
               setTimeout(() => {
+                setShuffledVoiceIndices(shuffledVoiceIndices.slice(1));
                 setReadingStep("READY");
                 setReading(true);
-              }, 3000);
+              }, 5000);
             } else {
               setClickable(true);
             }
@@ -142,6 +151,24 @@ export default () => {
               }}
             />
           )
+        }
+      </div>
+      <div className={classes.paper}>
+        {readingStep === "END" &&
+          <Fade in>
+            <Card style={{
+              width: "85vw"
+            }}>
+              <CardContent className={classes.cardContent}>
+                <Box>
+                  <Typography>答え</Typography>
+                </Box>
+                <Box>
+                  <img src={`${process.env.PUBLIC_URL}/card/${cardFileNames[shuffledVoiceIndices[0]]}`} className={classes.cardFace}/>
+                </Box>
+              </CardContent>
+            </Card>
+          </Fade>
         }
       </div>
     </Container>
