@@ -58,7 +58,8 @@ const useStyles = makeStyles(theme => ({
     fontWeight: "bold"
   },
   cardFace: {
-    width: "100%"
+    width: "100%",
+    maxWidth: "500px"
   }
 }));
 
@@ -158,7 +159,7 @@ const App = () => {
         {readingStep === "END" &&
           <Fade in>
             <Card style={{
-              width: "85vw"
+              maxWidth: "85vw"
             }}>
               <CardContent className={classes.cardContent}>
                 <Box>
