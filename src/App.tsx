@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import { Box, Button, Card, CardActions, CardContent, CardHeader, Container, CssBaseline, Fade, makeStyles, Typography } from '@material-ui/core';
+import { Box, Button, Card, CardActions, CardContent, Container, CssBaseline, Fade, makeStyles, Typography } from '@material-ui/core';
 import { default as Sound } from 'react-sound';
 import { default as shuffle } from 'shuffle-array';
 
@@ -62,7 +62,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default () => {
+const App = () => {
 
   const [readingStep, setReadingStep] = useState<"READY" | "SENTENCE" | "END">("READY");
   const [shuffledVoiceIndices, setShuffledVoiceIndices] = useState<Array<number>>([]);
@@ -164,7 +164,11 @@ export default () => {
                   <Typography>答え</Typography>
                 </Box>
                 <Box>
-                  <img src={`${process.env.PUBLIC_URL}/card/${cardFileNames[shuffledVoiceIndices[0]]}`} className={classes.cardFace}/>
+                  <img
+                    src={`${process.env.PUBLIC_URL}/card/${cardFileNames[shuffledVoiceIndices[0]]}`}
+                    className={classes.cardFace}
+                    alt={`答えの絵札は ${cardFileNames[shuffledVoiceIndices[0]].slice(0, -4)}`}
+                  />
                 </Box>
               </CardContent>
             </Card>
@@ -173,4 +177,6 @@ export default () => {
       </div>
     </Container>
   );
-}
+};
+
+export default App;
