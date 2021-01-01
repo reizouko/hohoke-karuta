@@ -142,6 +142,7 @@ const App = () => {
         {
           readingFiles.map((fileName, index) =>
             <Sound
+              key={`voice${index}`}
               url={`${process.env.PUBLIC_URL}/voice/${fileName}`}
               playStatus={reading && readingStep === "SENTENCE" && shuffledVoiceIndices[0] === index ? "PLAYING" : "STOPPED"}
               onFinishedPlaying={() => {
